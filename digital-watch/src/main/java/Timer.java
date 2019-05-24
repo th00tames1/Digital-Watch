@@ -1,4 +1,7 @@
 import java.awt.Toolkit;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class Timer extends Thread {
 	private static int hours;
@@ -9,6 +12,8 @@ public class Timer extends Thread {
 	private static int zeroState=0;
 
 	private Thread thread;
+	private Timer runnable;
+	ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor();
 
 	private int time =0;
 
@@ -45,10 +50,10 @@ public class Timer extends Thread {
 	private static class LazyHolder{
 		private static final Timer INSTANCE = new Timer();
 	}
-
+/*
 	public void startUpdateTime(Thread timeThread) {
 		timeThread.start();
-	}
+	}*/
 
 	public int getRunState() {
 		return this.runState;
@@ -65,7 +70,7 @@ public class Timer extends Thread {
 	}
 
 	public void pauseTimer() {
-		thread.interrupt();
+		service.shutdown();
 		//System.out.println(this.getTime());
 		this.runState=0;
 		if(this.getTime().equals("0 0 0"))
@@ -86,9 +91,11 @@ public class Timer extends Thread {
 	}
 
 	public void startTimer() {
-		thread = new Timer(this.getTime());
+		runnable = new Timer(getTime());
+		thread = new Thread(runnable);
+		service.scheduleAtFixedRate(runnable, 0, 10, TimeUnit.MILLISECONDS);
 		this.runState=1;
-		startUpdateTime(thread);
+		//startUpdateTime(thread);
 	}
 
 	public void resetTimer() {
@@ -124,21 +131,10 @@ public class Timer extends Thread {
 
 	}
 
-	public void run() {
-		while(true) {
-			try {
-				//System.out.println(this.getTime());
-				if(this.time==0)
-					System.out.println(this.getTime());
+	public void run(){
+		updateTime();
+		System.out.println(this.getTime());
 
-				updateTime();
-
-				if(this.zeroState==1)
-					break;
-
-				Thread.sleep(100);
-			}catch (InterruptedException e) {break;}
-		}
 
 	}
 
