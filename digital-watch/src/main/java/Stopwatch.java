@@ -74,7 +74,7 @@ public class Stopwatch implements Runnable {
 	}
 
 	public void pauseStopwatch() {
-		thread.interrupt();
+		service.shutdown();
 		this.runState = 0;
 		if (getTime().equals("0 0 0 0"))
 			zeroState = 1;
@@ -103,7 +103,6 @@ public class Stopwatch implements Runnable {
 
 	//@Override
 	public void run(){
-
 		updateTime();
 		System.out.println(this.getTime());
 
